@@ -1,6 +1,7 @@
 package com.cameriere.menu.models;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.persistence.CascadeType;
@@ -29,24 +30,23 @@ public class Request {
 	
 	@Schema(name = "products", description = "Products list", required = true)
 	@OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-	private List<Product> products;
+	private List<Product> products = new ArrayList<>();
 	
-	@Schema(name = "total_price", description = "Request total price", required = true)
-	private double total_price;
+	@Schema(name = "totalPrice", description = "Request total price", required = true)
+	private double totalPrice;
 	
-	@Schema(name = "created_at", description = "Request created timestamp")
+	@Schema(name = "createdAt", description = "Request created timestamp")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
-	private LocalDateTime created_at = LocalDateTime.now();
+	private LocalDateTime createdAt = LocalDateTime.now();
 
 	public Request() {
 	}
 
-	public Request(int id, List<Product> products, double total_price, LocalDateTime created_at) {
-		super();
+	public Request(int id, List<Product> products, double totalPrice, LocalDateTime createdAt) {
 		this.id = id;
 		this.products = products;
-		this.total_price = total_price;
-		this.created_at = created_at;
+		this.totalPrice = totalPrice;
+		this.createdAt = createdAt;
 	}
 
 	public int getId() {
@@ -65,19 +65,20 @@ public class Request {
 		this.products = products;
 	}
 
-	public double getTotal_price() {
-		return total_price;
+	public double getTotalPrice() {
+		return totalPrice;
 	}
 
-	public void setTotal_price(double total_price) {
-		this.total_price = total_price;
+	public void setTotalPrice(double totalPrice) {
+		this.totalPrice = totalPrice;
 	}
 
-	public LocalDateTime getCreated_at() {
-		return created_at;
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
 	}
 
-	public void setCreated_at(LocalDateTime created_at) {
-		this.created_at = created_at;
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 }

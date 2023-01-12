@@ -27,7 +27,6 @@ import com.cameriere.menu.models.Product;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.parameters.RequestBody;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 
@@ -68,7 +67,7 @@ public class ProductController {
 			@ApiResponse(responseCode = "400", description = "Error when registering the product", content = @Content) })
 	@Operation(summary = "Register a product", description = "Register a new product", tags = { "products" })
 	@PostMapping("/products")
-	public ResponseEntity<Object> registerProduct(@RequestBody @Valid Product product, @RequestParam MultipartFile file) throws IOException {
+	public ResponseEntity<Object> registerProduct(@Valid Product product, @RequestParam MultipartFile file) throws IOException {
 		String uploadDirectory = "/home/lucas/Documentos/Workspace/cameriere-system/menu/src/main/resources/static/images";
 		
 		try {
@@ -76,7 +75,7 @@ public class ProductController {
 			Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
 			fileName.append(file.getOriginalFilename());
 			Files.write(fileNameAndPath, file.getBytes());
-			product.setImage_path(fileNameAndPath.toString());
+			product.setImagePath(fileNameAndPath.toString());
 			dao.save(product);
 			return ResponseEntity.status(HttpStatus.OK).body("Product successfully created.");
 		} catch (IOException e) {
@@ -91,7 +90,7 @@ public class ProductController {
 			@ApiResponse(responseCode = "404", description = "Product not found", content = @Content) })
 	@Operation(summary = "Update a product", description = "Update a product by its id", tags = { "products" })
 	@PutMapping("/products/{id}")
-	public ResponseEntity<Object> updateProduct(@PathVariable int id, @RequestBody @Valid Product product, @RequestParam(required = false) MultipartFile file) throws IOException {
+	public ResponseEntity<Object> updateProduct(@PathVariable int id, @Valid Product product, @RequestParam(required = false) MultipartFile file) throws IOException {
 		String uploadDirectory = "/home/lucas/Documentos/Workspace/cameriere-system/menu/src/main/resources/static/images";
 		Optional<Product> optionalProductBean = dao.findById(id);
 		
@@ -101,13 +100,13 @@ public class ProductController {
 			productBean.setPrice(product.getPrice());
 			
 			if (file != null) {
-				File oldFile = new File(productBean.getImage_path());
+				File oldFile = new File(productBean.getImagePath());
 				oldFile.delete();
 				StringBuilder fileName = new StringBuilder();
 				Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
 				fileName.append(file.getOriginalFilename());
 				Files.write(fileNameAndPath, file.getBytes());
-				productBean.setImage_path(fileNameAndPath.toString());
+				productBean.setImagePath(fileNameAndPath.toString());
 			}
 			
 			dao.save(productBean);
@@ -129,7 +128,7 @@ public class ProductController {
 		
 		if (optionalProductBean.isPresent()) {
 			Product productBean = optionalProductBean.get();
-			File oldFile = new File(productBean.getImage_path());
+			File oldFile = new File(productBean.getImagePath());
 			oldFile.delete();
 			dao.delete(productBean);
 			return ResponseEntity.status(HttpStatus.OK).body("Product successfully deleted.");
