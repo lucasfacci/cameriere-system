@@ -4,13 +4,13 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.CascadeType;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.ManyToMany;
 import javax.persistence.Table;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -28,25 +28,28 @@ public class Request {
 	@GeneratedValue(strategy = GenerationType.AUTO)
 	private int id;
 	
-	@Schema(name = "products", description = "Products list", required = true)
-	@OneToMany(cascade = CascadeType.PERSIST, fetch = FetchType.EAGER)
-	private List<Product> products = new ArrayList<>();
-	
 	@Schema(name = "totalPrice", description = "Request total price", required = true)
 	private double totalPrice;
 	
 	@Schema(name = "createdAt", description = "Request created timestamp")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdAt = LocalDateTime.now();
+	
+	@Schema(name = "products", description = "Products list", required = true)
+	@ManyToMany
+	@JoinTable(name = "request_product",
+	    joinColumns = @JoinColumn(name = "request_id"),
+	    inverseJoinColumns = @JoinColumn(name = "product_id"))
+	private List<Product> products = new ArrayList<>();
 
 	public Request() {
 	}
 
-	public Request(int id, List<Product> products, double totalPrice, LocalDateTime createdAt) {
+	public Request(int id, double totalPrice, LocalDateTime createdAt, List<Product> products) {
 		this.id = id;
-		this.products = products;
 		this.totalPrice = totalPrice;
 		this.createdAt = createdAt;
+		this.products = products;
 	}
 
 	public int getId() {
@@ -57,14 +60,6 @@ public class Request {
 		this.id = id;
 	}
 
-	public List<Product> getProducts() {
-		return products;
-	}
-
-	public void setProducts(List<Product> products) {
-		this.products = products;
-	}
-
 	public double getTotalPrice() {
 		return totalPrice;
 	}
@@ -73,12 +68,19 @@ public class Request {
 		this.totalPrice = totalPrice;
 	}
 
-
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public List<Product> getProducts() {
+		return products;
+	}
+
+	public void setProducts(List<Product> products) {
+		this.products = products;
 	}
 }
