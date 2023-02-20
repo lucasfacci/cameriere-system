@@ -43,6 +43,9 @@ target/
 .springBeans
 .sts4-cache
 
+### VS Code ###
+.vscode/
+
 ### IntelliJ IDEA ###
 .idea
 *.iws
@@ -58,9 +61,3 @@ target/
 build/
 !**/src/main/**/build/
 !**/src/test/**/build/
-
-### VS Code ###
-.vscode/
-
-### IntelliJ ###
-.idea/
