@@ -98,6 +98,7 @@ public class ProductController {
 			Product productBean = optionalProductBean.get();
 			productBean.setName(product.getName());
 			productBean.setPrice(product.getPrice());
+			productBean.setIsActive(product.getIsActive());
 			
 			if (file != null) {
 				File oldFile = new File(productBean.getImagePath());

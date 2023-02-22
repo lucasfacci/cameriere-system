@@ -20,6 +20,7 @@ import com.cameriere.menu.daos.ProductDAO;
 import com.cameriere.menu.daos.RequestDAO;
 import com.cameriere.menu.dtos.RequestDTO;
 import com.cameriere.menu.models.Request;
+import com.cameriere.menu.producers.RequestProducer;
 import com.cameriere.menu.models.Product;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -35,6 +36,9 @@ public class RequestController {
 	
 	@Autowired
 	ProductDAO productDao;
+	
+	@Autowired
+	private RequestProducer producer;
 	
 	@ApiResponses(value = { @ApiResponse(responseCode = "200", description = "Listed requests", content = {
 			@Content(mediaType = "application/json", schema = @Schema(implementation = Request.class)) }) })
@@ -80,6 +84,7 @@ public class RequestController {
  		request.setTotalPrice(totalPrice);
  		
  		requestDao.save(request);
+ 		producer.send(request.getId() + ";" + request.getTotalPrice() + ";" + request.getCreatedAt() + ";" + request.getProducts());
 		return ResponseEntity.status(HttpStatus.OK).body("Request successfully created.");
 	}
 	

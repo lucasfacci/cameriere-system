@@ -38,17 +38,23 @@ public class Product {
 	@Schema(name = "createdAt", description = "Product created timestamp")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdAt = LocalDateTime.now();
+	
+	@Schema(name = "isActive", description = "If the product is active")
+	private boolean isActive = true;
 
 	public Product() {
 	}
 
 	public Product(int id, @NotNull(message = "Enter the product name.") String name,
-			@NotNull(message = "Enter the product price.") double price, String imagePath, LocalDateTime createdAt) {
+			@NotNull(message = "Enter the product price.") double price, String imagePath, LocalDateTime createdAt,
+			boolean isActive) {
+		super();
 		this.id = id;
 		this.name = name;
 		this.price = price;
 		this.imagePath = imagePath;
 		this.createdAt = createdAt;
+		this.isActive = isActive;
 	}
 
 	public int getId() {
@@ -89,5 +95,13 @@ public class Product {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public boolean getIsActive() {
+		return isActive;
+	}
+
+	public void setIsActive(boolean isActive) {
+		this.isActive = isActive;
 	}
 }
