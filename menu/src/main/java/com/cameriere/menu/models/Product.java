@@ -1,6 +1,8 @@
 package com.cameriere.menu.models;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
@@ -8,6 +10,8 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
+
+import org.hibernate.annotations.Type;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
@@ -22,7 +26,8 @@ public class Product {
 	@Schema(name = "id", description = "Product id", accessMode = AccessMode.READ_ONLY)
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private int id;
+	@Type(type="org.hibernate.type.UUIDCharType")
+	private UUID id;
 	
 	@Schema(name = "name", description = "Product name", required = true, example = "Water bottle")
 	@NotNull(message = "Enter the product name.")
@@ -30,7 +35,7 @@ public class Product {
 	
 	@Schema(name = "price", description = "Product price", required = true, example = "5")
 	@NotNull(message = "Enter the product price.")
-	private double price;
+	private BigDecimal price;
 	
 	@Schema(name = "imagePath", description = "Product image path", required = true)
 	private String imagePath;
@@ -45,10 +50,9 @@ public class Product {
 	public Product() {
 	}
 
-	public Product(int id, @NotNull(message = "Enter the product name.") String name,
-			@NotNull(message = "Enter the product price.") double price, String imagePath, LocalDateTime createdAt,
+	public Product(UUID id, @NotNull(message = "Enter the product name.") String name,
+			@NotNull(message = "Enter the product price.") BigDecimal price, String imagePath, LocalDateTime createdAt,
 			boolean isActive) {
-		super();
 		this.id = id;
 		this.name = name;
 		this.price = price;
@@ -57,11 +61,11 @@ public class Product {
 		this.isActive = isActive;
 	}
 
-	public int getId() {
+	public UUID getId() {
 		return id;
 	}
 
-	public void setId(int id) {
+	public void setId(UUID id) {
 		this.id = id;
 	}
 
@@ -73,11 +77,11 @@ public class Product {
 		this.name = name;
 	}
 
-	public double getPrice() {
+	public BigDecimal getPrice() {
 		return price;
 	}
 
-	public void setPrice(double price) {
+	public void setPrice(BigDecimal price) {
 		this.price = price;
 	}
 
