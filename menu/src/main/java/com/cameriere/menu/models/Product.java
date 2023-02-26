@@ -4,47 +4,34 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.Table;
-import javax.validation.constraints.NotNull;
-
-import org.hibernate.annotations.Type;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import io.swagger.v3.oas.annotations.media.Schema.AccessMode;
-
-@Schema(name = "Product", description = "Represents a product")
 @Table(name = "product")
 @Entity
 public class Product {
 
-	@Schema(name = "id", description = "Product id", accessMode = AccessMode.READ_ONLY)
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	@Type(type="org.hibernate.type.UUIDCharType")
 	private UUID id;
 	
-	@Schema(name = "name", description = "Product name", required = true, example = "Water bottle")
 	@NotNull(message = "Enter the product name.")
 	private String name;
 	
-	@Schema(name = "price", description = "Product price", required = true, example = "5")
 	@NotNull(message = "Enter the product price.")
 	private BigDecimal price;
 	
-	@Schema(name = "imagePath", description = "Product image path", required = true)
 	private String imagePath;
 	
-	@Schema(name = "createdAt", description = "Product created timestamp")
 	@JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
 	private LocalDateTime createdAt = LocalDateTime.now();
 	
-	@Schema(name = "isActive", description = "If the product is active")
 	private boolean isActive = true;
 
 	public Product() {

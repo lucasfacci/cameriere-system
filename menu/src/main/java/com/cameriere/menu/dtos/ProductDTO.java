@@ -2,7 +2,7 @@ package com.cameriere.menu.dtos;
 
 import java.math.BigDecimal;
 
-import javax.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotBlank;
 
 public class ProductDTO {
 	

@@ -15,6 +15,7 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class HealthMonitor implements HealthIndicator {
 	
+	@SuppressWarnings("deprecation")
 	@Override
 	public Health health() {
 		RestTemplate restTemplate = new RestTemplate();
