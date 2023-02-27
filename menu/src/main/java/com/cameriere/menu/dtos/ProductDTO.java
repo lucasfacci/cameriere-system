@@ -10,10 +10,10 @@ public class ProductDTO {
 	private String name;
 	
 	private BigDecimal price;
-	
+
 	private String imagePath;
-	
-	private boolean isActive = true;
+
+	private boolean isActive;
 
 	public String getName() {
 		return name;

@@ -58,14 +58,15 @@ public class ProductController {
 		
 		try {
 			var productModel = new Product();
-			BeanUtils.copyProperties(productDTO, productModel);
 			StringBuilder fileName = new StringBuilder();
 			Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
 			fileName.append(file.getOriginalFilename());
 			Files.write(fileNameAndPath, file.getBytes());
+			productModel.setName(productDTO.getName());
+			productModel.setPrice(productDTO.getPrice());
 			productModel.setImagePath(fileNameAndPath.toString());
-			productService.save(productModel);
-			return ResponseEntity.status(HttpStatus.OK).body("Product successfully created.");
+
+			return ResponseEntity.status(HttpStatus.OK).body(productService.save(productModel));
 		} catch (IOException e) {
 			throw new RuntimeException("It wasn't possible to upload the file.");
 		}
@@ -91,9 +92,8 @@ public class ProductController {
 				Files.write(fileNameAndPath, file.getBytes());
 				productModel.setImagePath(fileNameAndPath.toString());
 			}
-			
-			productService.save(productModel);
-			return ResponseEntity.status(HttpStatus.OK).body("Product successfully updated.");
+
+			return ResponseEntity.status(HttpStatus.OK).body(productService.save(productModel));
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
 		}
@@ -108,6 +108,7 @@ public class ProductController {
 			File oldFile = new File(productModel.getImagePath());
 			oldFile.delete();
 			productService.delete(productModel);
+
 			return ResponseEntity.status(HttpStatus.OK).body("Product successfully deleted.");
 		} else {
 			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
