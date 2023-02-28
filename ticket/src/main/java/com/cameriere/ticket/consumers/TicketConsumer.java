@@ -8,14 +8,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
-import com.cameriere.ticket.daos.TicketDAO;
+import com.cameriere.ticket.repositories.TicketRepository;
 import com.cameriere.ticket.models.Ticket;
 
 @Service
 public class TicketConsumer {
 
 	@Autowired
-	TicketDAO dao;
+	TicketRepository dao;
 
 	@Value("${topic.name.consumer}")
 	private String topicName;

@@ -32,14 +32,17 @@ public class Order {
 	
 	private List<String> products = new ArrayList<>();
 
+	private boolean isActive = true;
+
 	public Order() {
 	}
 
-	public Order(UUID id, BigDecimal totalPrice, LocalDateTime createdAt, List<String> products) {
+	public Order(UUID id, BigDecimal totalPrice, LocalDateTime createdAt, List<String> products, boolean isActive) {
 		this.id = id;
 		this.totalPrice = totalPrice;
 		this.createdAt = createdAt;
 		this.products = products;
+		this.isActive = isActive;
 	}
 
 	public UUID getId() {
@@ -72,5 +75,13 @@ public class Order {
 
 	public void setProducts(List<String> products) {
 		this.products = products;
+	}
+
+	public boolean isActive() {
+		return isActive;
+	}
+
+	public void setActive(boolean active) {
+		isActive = active;
 	}
 }

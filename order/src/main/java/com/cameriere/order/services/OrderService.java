@@ -1,6 +1,8 @@
 package com.cameriere.order.services;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -26,4 +28,13 @@ public class OrderService {
 	public List<Order> findAll() {
 		return orderRepository.findAll();
 	}
+
+    public Optional<Order> findById(UUID id) {
+		return orderRepository.findById(id);
+    }
+
+	@Transactional
+    public void delete(Order orderModel) {
+		orderRepository.delete(orderModel);
+    }
 }
