@@ -6,6 +6,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.cameriere.order.dtos.ProductDTO;
+import com.cameriere.order.producers.OrderProducer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,11 +23,13 @@ import jakarta.validation.Valid;
 public class OrderController {
 
 	private final OrderService orderService;
-	private final ProductProxy productProxy;	
+	private final ProductProxy productProxy;
+	private final OrderProducer orderProducer;
 
-	public OrderController(OrderService orderService, ProductProxy productProxy) {
+	public OrderController(OrderService orderService, ProductProxy productProxy, OrderProducer orderProducer) {
 		this.orderService = orderService;
 		this.productProxy = productProxy;
+		this.orderProducer = orderProducer;
 	}
 	
 	@GetMapping("/orders")
@@ -61,7 +64,9 @@ public class OrderController {
 			}
 		}
 		orderModel.setTotalPrice(totalPrice);
-		return ResponseEntity.status(HttpStatus.OK).body(orderService.save(orderModel));
+		orderService.save(orderModel);
+		orderProducer.send(orderModel.getId() + ";" + orderModel.getTotalPrice() + ";" + orderModel.getCreatedAt() + ";" + orderModel.getProducts());
+		return ResponseEntity.status(HttpStatus.OK).body(orderModel);
 	}
 
 	@PutMapping("/orders/{id}")

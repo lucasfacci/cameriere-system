@@ -1,20 +1,20 @@
 package com.cameriere.order.producers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.stereotype.Service;
+import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 public class OrderProducer {
-	
-	@Value("${topic.name.producer}")
-	private String topicName;
-	
-	@Autowired
-	private KafkaTemplate<String, String> kafkaTemplate;
-	
+	private RabbitTemplate rabbitTemplate;
+	private Queue queue;
+
+	public OrderProducer(RabbitTemplate rabbitTemplate, Queue queue) {
+		this.rabbitTemplate = rabbitTemplate;
+		this.queue = queue;
+	}
+
 	public void send(String message) {
-		kafkaTemplate.send(topicName, message);
+		rabbitTemplate.convertAndSend(this.queue.getName(), message);
 	}
 }
