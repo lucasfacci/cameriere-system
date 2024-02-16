@@ -54,6 +54,11 @@ public class ProductController {
 	@PostMapping("/products")
 	public ResponseEntity<Object> registerProduct(@Valid ProductDTO productDTO, @RequestParam MultipartFile file) throws IOException {
 		String uploadDirectory = "/home/lucas/Documentos/Workspace/cameriere-system/menu/src/main/resources/static/images";
+		Path uploadPath = Paths.get(uploadDirectory);
+		
+		if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+		}
 		
 		try {
 			var productModel = new Product();
