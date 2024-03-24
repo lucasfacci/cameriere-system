@@ -1,20 +1,14 @@
-package com.cameriere.user.models;
+package com.cameriere.oauth.models;
 
 import java.io.Serializable;
-import java.util.HashSet;
 import java.util.Objects;
-import java.util.Set;
 import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.Table;
 
 @Table(name = "tb_user")
@@ -27,26 +21,23 @@ public class User implements Serializable {
 	private UUID id;
 	
 	private String name;
+
+	@Column(unique = true, nullable = false)
+	private String username;
 	
 	@Column(unique = true, nullable = false)
 	private String email;
 	
 	@Column(nullable = false)
 	private String password;
-	
-	@ManyToMany(fetch = FetchType.EAGER)
-	@JoinTable(name = "tb_user_role",
-		joinColumns = @JoinColumn(name = "user_id"),
-		inverseJoinColumns = @JoinColumn(name = "role_id")
-	)
-	private Set<Role> roles = new HashSet<>();
 
 	public User() {
 	}
 
-	public User(UUID id, String name, String email, String password) {
+	public User(UUID id, String name, String username, String email, String password) {
 		this.id = id;
 		this.name = name;
+		this.username = username;
 		this.email = email;
 		this.password = password;
 	}
@@ -67,6 +58,14 @@ public class User implements Serializable {
 		this.name = name;
 	}
 
+	public String getUsername() {
+		return username;
+	}
+
+	public void setUsername(String username) {
+		this.username = username;
+	}
+
 	public String getEmail() {
 		return email;
 	}
@@ -81,10 +80,6 @@ public class User implements Serializable {
 
 	public void setPassword(String password) {
 		this.password = password;
-	}
-
-	public Set<Role> getRoles() {
-		return roles;
 	}
 
 	@Override

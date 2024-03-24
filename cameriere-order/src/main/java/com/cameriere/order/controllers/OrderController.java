@@ -10,7 +10,13 @@ import com.cameriere.order.producers.OrderProducer;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.cameriere.order.dtos.OrderDTO;
 import com.cameriere.order.models.Order;
@@ -49,7 +55,7 @@ public class OrderController {
 	}
 
 	@PostMapping("/orders")
-	public ResponseEntity<Object> saveOrder(@RequestBody @Valid OrderDTO orderDTO) {
+	public ResponseEntity<Object> saveOrder(@RequestBody @Valid OrderDTO orderDTO) {        
 		var orderModel = new Order();
 		List<String> productsIds = orderDTO.getProducts();
 		BeanUtils.copyProperties(orderDTO, orderModel);
