@@ -1,128 +1,167 @@
 package com.cameriere.menu.controllers;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
+import com.cameriere.menu.constants.ProductConstants;
+import com.cameriere.menu.dtos.ErrorResponseDTO;
+import com.cameriere.menu.dtos.ProductDTORequest;
+import com.cameriere.menu.dtos.ResponseDTO;
+import com.cameriere.menu.services.IProductService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContext;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cameriere.menu.dtos.ProductDTO;
-import com.cameriere.menu.models.Product;
-import com.cameriere.menu.services.ProductService;
+import com.cameriere.menu.dtos.ProductDTOResponse;
 
+@Tag(
+		name = "CRUD REST API for Menu in Cameriere System.",
+		description = "CRUD REST API in Cameriere System to CREATE, UPDATE, GET and DELETE menu products."
+)
 @RestController
+@RequestMapping(path = "/products", produces = {MediaType.APPLICATION_JSON_VALUE})
+@AllArgsConstructor
+@Validated
 public class ProductController {
-	
-	private final ProductService productService;
 
-	public ProductController(ProductService productService) {
-		this.productService = productService;
+	private IProductService iProductService;
+
+	@Operation(
+			summary = "Get Products REST API.",
+			description = "REST API to get a list of products from the Cameriere System."
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "HTTP Status OK."
+	)
+	@GetMapping
+	public ResponseEntity<List<ProductDTOResponse>> listProducts() {
+		List<ProductDTOResponse> productDTOResponses = iProductService.listProducts();
+		return ResponseEntity.status(HttpStatus.OK).body(productDTOResponses);
 	}
-	
-//	@PreAuthorize("hasAuthority('TEST')")
-	@GetMapping("/products")
-	public ResponseEntity<List<Product>> listProducts() {
-		SecurityContext context = SecurityContextHolder.getContext();
-        Authentication authentication = context.getAuthentication();
-        System.out.println("Scopes: " + authentication.getAuthorities());
-		return new ResponseEntity<List<Product>>(productService.findAll(), HttpStatus.OK);
+
+	@Operation(
+			summary = "Get Product REST API.",
+			description = "REST API to get a single product from the Cameriere System based on a UUID."
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "HTTP Status OK."
+	)
+	@GetMapping("/{id}")
+	public ResponseEntity<ProductDTOResponse> getProduct(@PathVariable
+															 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+																	 message = "The id must be a valid UUID.")
+															 String id) {
+		ProductDTOResponse productDTOResponse = iProductService.getProduct(id);
+		return ResponseEntity.status(HttpStatus.OK).body(productDTOResponse);
 	}
-	
-	@GetMapping("/products/{id}")
-	public ResponseEntity<Object> getProduct(@PathVariable UUID id) {
-		Optional<Product> optionalProductModel = productService.findById(id);
-		
-		if (optionalProductModel.isPresent()) {
-			return ResponseEntity.status(HttpStatus.OK).body(optionalProductModel.get());
+
+	@Operation(
+			summary = "Create Product REST API.",
+			description = "REST API to create a new product in the Cameriere System."
+	)
+	@ApiResponse(
+			responseCode = "201",
+			description = "HTTP Status CREATED."
+	)
+	@PostMapping
+	public ResponseEntity<ResponseDTO> registerProduct(@Valid ProductDTORequest productDTORequest,
+													   @RequestParam MultipartFile file) throws IOException {
+		iProductService.registerProduct(productDTORequest, file);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(new ResponseDTO(ProductConstants.STATUS_201, ProductConstants.MESSAGE_201));
+	}
+
+	@Operation(
+			summary = "Update Product REST API.",
+			description = "REST API to update a product in the Cameriere System based on a UUID."
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK."
+			),
+			@ApiResponse(
+					responseCode = "417",
+					description = "Expectation Failed."
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status INTERNAL SERVER ERROR.",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDTO.class)
+					)
+			)
+	})
+	@PutMapping("/{id}")
+	public ResponseEntity<ResponseDTO> updateProduct(@PathVariable
+														 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+																 message = "The id must be a valid UUID.")
+														 String id,
+													 @Valid ProductDTORequest productDTORequest,
+													 @RequestParam(required = false) MultipartFile file) throws IOException {
+		boolean isUpdated = iProductService.updateProduct(id, productDTORequest, file);
+		if (isUpdated) {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(new ResponseDTO(ProductConstants.STATUS_200, ProductConstants.MESSAGE_200));
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new ResponseDTO(ProductConstants.STATUS_417, ProductConstants.MESSAGE_417_UPDATE));
 		}
 	}
-	
-	@PostMapping("/products")
-	public ResponseEntity<Object> registerProduct(@Valid ProductDTO productDTO, @RequestParam MultipartFile file) throws IOException {
-		String uploadDirectory = "/home/lucas/Documentos/Workspace/cameriere-system/menu/src/main/resources/static/images";
-		Path uploadPath = Paths.get(uploadDirectory);
-		
-		if (!Files.exists(uploadPath)) {
-            Files.createDirectories(uploadPath);
-		}
-		
-		try {
-			var productModel = new Product();
-			StringBuilder fileName = new StringBuilder();
-			Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
-			fileName.append(file.getOriginalFilename());
-			Files.write(fileNameAndPath, file.getBytes());
-			productModel.setName(productDTO.getName());
-			productModel.setPrice(productDTO.getPrice());
-			productModel.setImagePath(fileNameAndPath.toString());
 
-			return ResponseEntity.status(HttpStatus.OK).body(productService.save(productModel));
-		} catch (IOException e) {
-			throw new RuntimeException("It wasn't possible to upload the file.");
-		}
-	}
-	
-	@PutMapping("/products/{id}")
-	public ResponseEntity<Object> updateProduct(@PathVariable UUID id, @Valid ProductDTO productDTO, @RequestParam(required = false) MultipartFile file) throws IOException {
-		String uploadDirectory = "/home/lucas/Documentos/Workspace/cameriere-system/menu/src/main/resources/static/images";
-		Optional<Product> optionalProductModel = productService.findById(id);
-		
-		if (optionalProductModel.isPresent()) {
-			Product productModel = optionalProductModel.get();
-			productModel.setName(productDTO.getName());
-			productModel.setPrice(productDTO.getPrice());
-			productModel.setIsActive(productDTO.getIsActive());
-			
-			if (file != null) {
-				File oldFile = new File(productModel.getImagePath());
-				oldFile.delete();
-				StringBuilder fileName = new StringBuilder();
-				Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
-				fileName.append(file.getOriginalFilename());
-				Files.write(fileNameAndPath, file.getBytes());
-				productModel.setImagePath(fileNameAndPath.toString());
-			}
-
-			return ResponseEntity.status(HttpStatus.OK).body(productService.save(productModel));
+	@Operation(
+			summary = "Delete Product REST API.",
+			description = "REST API to delete a product in the Cameriere System."
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK."
+			),
+			@ApiResponse(
+					responseCode = "417",
+					description = "Expectation Failed."
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status INTERNAL SERVER ERROR.",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDTO.class)
+					)
+			)
+	})
+	@DeleteMapping("/{id}")
+	public ResponseEntity<ResponseDTO> deleteProduct(@PathVariable
+														 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+																 message = "The id must be a valid UUID.")
+														 String id) {
+		boolean isDeleted = iProductService.deleteProduct(id);
+		if (isDeleted) {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(new ResponseDTO(ProductConstants.STATUS_200, ProductConstants.MESSAGE_200));
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
-		}
-	}
-
-	@DeleteMapping("/products/{id}")
-	public ResponseEntity<Object> deleteProduct(@PathVariable UUID id) {
-		Optional<Product> optionalProductModel = productService.findById(id);
-		
-		if (optionalProductModel.isPresent()) {
-			Product productModel = optionalProductModel.get();
-			File oldFile = new File(productModel.getImagePath());
-			oldFile.delete();
-			productService.delete(productModel);
-
-			return ResponseEntity.status(HttpStatus.OK).body("Product successfully deleted.");
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Product not found.");
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new ResponseDTO(ProductConstants.STATUS_417, ProductConstants.MESSAGE_417_DELETE));
 		}
 	}
 }
