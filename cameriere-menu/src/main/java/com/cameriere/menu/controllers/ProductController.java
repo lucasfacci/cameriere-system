@@ -5,7 +5,7 @@ import java.util.List;
 
 import com.cameriere.menu.constants.ProductConstants;
 import com.cameriere.menu.dtos.ErrorResponseDTO;
-import com.cameriere.menu.dtos.ProductDTORequest;
+import com.cameriere.menu.dtos.ProductRequestDTO;
 import com.cameriere.menu.dtos.ResponseDTO;
 import com.cameriere.menu.services.IProductService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,7 +25,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.cameriere.menu.dtos.ProductDTOResponse;
+import com.cameriere.menu.dtos.ProductResponseDTO;
 
 @Tag(
 		name = "CRUD REST API for Menu in Cameriere System.",
@@ -48,9 +48,8 @@ public class ProductController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping
-	public ResponseEntity<List<ProductDTOResponse>> listProducts() {
-		List<ProductDTOResponse> productDTOResponses = iProductService.listProducts();
-		return ResponseEntity.status(HttpStatus.OK).body(productDTOResponses);
+	public ResponseEntity<List<ProductResponseDTO>> listProducts() {
+		return ResponseEntity.status(HttpStatus.OK).body(iProductService.listProducts());
 	}
 
 	@Operation(
@@ -62,12 +61,12 @@ public class ProductController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping("/{id}")
-	public ResponseEntity<ProductDTOResponse> getProduct(@PathVariable
+	public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable
 															 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
 																	 message = "The id must be a valid UUID.")
 															 String id) {
-		ProductDTOResponse productDTOResponse = iProductService.getProduct(id);
-		return ResponseEntity.status(HttpStatus.OK).body(productDTOResponse);
+		ProductResponseDTO productResponseDTO = iProductService.getProduct(id);
+		return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
 	}
 
 	@Operation(
@@ -79,9 +78,9 @@ public class ProductController {
 			description = "HTTP Status CREATED."
 	)
 	@PostMapping
-	public ResponseEntity<ResponseDTO> registerProduct(@Valid ProductDTORequest productDTORequest,
+	public ResponseEntity<ResponseDTO> registerProduct(@Valid ProductRequestDTO productRequestDTO,
 													   @RequestParam MultipartFile file) throws IOException {
-		iProductService.registerProduct(productDTORequest, file);
+		iProductService.registerProduct(productRequestDTO, file);
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
 				.body(new ResponseDTO(ProductConstants.STATUS_201, ProductConstants.MESSAGE_201));
@@ -113,9 +112,9 @@ public class ProductController {
 														 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
 																 message = "The id must be a valid UUID.")
 														 String id,
-													 @Valid ProductDTORequest productDTORequest,
+													 @Valid ProductRequestDTO productRequestDTO,
 													 @RequestParam(required = false) MultipartFile file) throws IOException {
-		boolean isUpdated = iProductService.updateProduct(id, productDTORequest, file);
+		boolean isUpdated = iProductService.updateProduct(id, productRequestDTO, file);
 		if (isUpdated) {
 			return ResponseEntity
 					.status(HttpStatus.OK)

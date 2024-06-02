@@ -1,8 +1,8 @@
 package com.cameriere.menu.services.impl;
 
 import com.cameriere.menu.constants.ProductConstants;
-import com.cameriere.menu.dtos.ProductDTORequest;
-import com.cameriere.menu.dtos.ProductDTOResponse;
+import com.cameriere.menu.dtos.ProductRequestDTO;
+import com.cameriere.menu.dtos.ProductResponseDTO;
 import com.cameriere.menu.exceptions.ResourceNotFoundException;
 import com.cameriere.menu.exceptions.UnableToDeleteFileException;
 import com.cameriere.menu.exceptions.UnableToUploadFileException;
@@ -35,13 +35,16 @@ public class ProductServiceImpl implements IProductService {
 	 * @return All the products
 	 */
 	@Override
-	public List<ProductDTOResponse> listProducts() {
+	public List<ProductResponseDTO> listProducts() {
 		List<Product> products = productRepository.findAll();
-		List<ProductDTOResponse> productDTOResponses = new ArrayList<ProductDTOResponse>();
+		List<ProductResponseDTO> productResponseDTOs = new ArrayList<>();
+
 		for (Product product : products) {
-			productDTOResponses.add(ProductMapper.mapToProductDTOResponseFromProduct(product, new ProductDTOResponse()));
+			ProductResponseDTO productResponseDTO = ProductMapper.mapToProductResponseDTOFromProduct(product, new ProductResponseDTO());
+			productResponseDTOs.add(productResponseDTO);
 		}
-		return productDTOResponses;
+
+		return productResponseDTOs;
 	}
 
 	/**
@@ -49,22 +52,27 @@ public class ProductServiceImpl implements IProductService {
 	 * @return A product based on a given ID
 	 */
 	@Override
-	public ProductDTOResponse getProduct(String id) {
+	public ProductResponseDTO getProduct(String id) {
 		Product product = productRepository.findById(UUID.fromString(id)).orElseThrow(
 				() -> new ResourceNotFoundException("Product", "id", id)
 		);
 
-        return ProductMapper.mapToProductDTOResponseFromProduct(product, new ProductDTOResponse());
+        return ProductMapper.mapToProductResponseDTOFromProduct(product, new ProductResponseDTO());
 	}
 
 	/**
 	 *
-	 * @param productDTORequest - ProductDTORequest Object
+	 * @param productRequestDTO - ProductRequestDTO Object
 	 * @param file - Product image file
+	 * @throws IOException IOException if there is an error reading from or writing to the file system
 	 */
 	@Override
-	public void registerProduct(ProductDTORequest productDTORequest, MultipartFile file) throws IOException {
-		Product product = ProductMapper.mapToProductFromProductDTORequest(productDTORequest, new Product());
+	public void registerProduct(ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException {
+		Product product = ProductMapper.mapToProductFromProductRequestDTO(productRequestDTO, new Product());
+
+		if (productRequestDTO.getActive() == null) {
+			product.setActive(true);
+		}
 
 		String uploadDirectory = ProductConstants.IMAGES_LOCATION;
 		Path uploadPath = Paths.get(uploadDirectory);
@@ -81,24 +89,28 @@ public class ProductServiceImpl implements IProductService {
 			throw new UnableToUploadFileException("It wasn't possible to upload the file.");
 		}
 
-		product.setActive(true);
 		productRepository.save(product);
 	}
 
 	/**
 	 * @param id - Input ID
-	 * @param productDTORequest - ProductDTORequest Object
+	 * @param productRequestDTO - ProductRequestDTO Object
 	 * @param file - Product image file
-	 * @return boolean indicating if the update of Product details is successful or not
+	 * @return boolean indicating whether the product update was successful or not
 	 * @throws IOException IOException if there is an error reading from or writing to the file system
 	 */
 	@Override
-	public boolean updateProduct(String id, ProductDTORequest productDTORequest, MultipartFile file) throws IOException {
+	public boolean updateProduct(String id, ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException {
 		String uploadDirectory = ProductConstants.IMAGES_LOCATION;
 
 		Product product = productRepository.findById(UUID.fromString(id)).orElseThrow(
 				() -> new ResourceNotFoundException("Product", "id", id)
 		);
+
+		Boolean active = true;
+		if (productRequestDTO.getActive() == null) {
+			 active = product.getActive();
+		}
 
 		if (file != null) {
 			File oldFile = new File(product.getImagePath());
@@ -107,7 +119,7 @@ public class ProductServiceImpl implements IProductService {
 				throw new UnableToDeleteFileException("It wasn't possible to delete the file.");
 			}
 
-			Path fileNameAndPath = null;
+			Path fileNameAndPath;
 			try {
 				fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
 				Files.write(fileNameAndPath, file.getBytes());
@@ -115,8 +127,12 @@ public class ProductServiceImpl implements IProductService {
 				throw new UnableToUploadFileException("It wasn't possible to upload the file.");
 			}
 
-			ProductMapper.mapToProductFromProductDTORequest(productDTORequest, product);
+			ProductMapper.mapToProductFromProductRequestDTO(productRequestDTO, product);
 			product.setImagePath(fileNameAndPath.toString());
+		}
+
+		if (productRequestDTO.getActive() == null) {
+			product.setActive(active);
 		}
 
 		productRepository.save(product);
@@ -125,7 +141,7 @@ public class ProductServiceImpl implements IProductService {
 
 	/**
 	 * @param id - Input ID
-	 * @return boolean indicating if the delete of Product details is successful or not
+	 * @return boolean indicating whether the product deletion was successful or not
 	 */
 	@Override
 	public boolean deleteProduct(String id) {

@@ -13,7 +13,6 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.method.annotation.ModelAttributeMethodProcessor;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.time.LocalDateTime;
@@ -54,18 +53,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(validationErrors, HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(ConstraintViolationException.class)
-    public ResponseEntity<ErrorResponseDTO> handleConstraintViolationException(ConstraintViolationException ex,
-                                                                     WebRequest webRequest) {
-        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(
-                webRequest.getDescription(false),
-                HttpStatus.BAD_REQUEST,
-                ex.getMessage(),
-                LocalDateTime.now()
-        );
-        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponseDTO> handleGlobalException(Exception exception,
                                                                   WebRequest webRequest) {
@@ -75,7 +62,21 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
+
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ErrorResponseDTO> handleConstraintViolationException(ConstraintViolationException ex,
+                                                                               WebRequest webRequest) {
+        ErrorResponseDTO errorResponseDTO = new ErrorResponseDTO(
+                webRequest.getDescription(false),
+                HttpStatus.BAD_REQUEST,
+                ex.getMessage(),
+                LocalDateTime.now()
+        );
+
+        return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(ResourceNotFoundException.class)
@@ -87,6 +88,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
+
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.NOT_FOUND);
     }
 
@@ -99,6 +101,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
+
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 
@@ -111,6 +114,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 exception.getMessage(),
                 LocalDateTime.now()
         );
+
         return new ResponseEntity<>(errorResponseDTO, HttpStatus.BAD_REQUEST);
     }
 }

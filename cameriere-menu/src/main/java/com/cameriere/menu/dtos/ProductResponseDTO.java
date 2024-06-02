@@ -10,13 +10,19 @@ import lombok.Data;
 		description = "Schema to hold Product request information."
 )
 @Data
-public class ProductDTOResponse {
+public class ProductResponseDTO {
 
 	@Schema(
 			description = "Name of the product.",
 			example = "Cappuccino"
 	)
 	private String name;
+
+	@Schema(
+			description = "Quantity of products available.",
+			example = "50"
+	)
+	private int quantity;
 
 	@Schema(
 			description = "Price of the product.",
@@ -29,4 +35,16 @@ public class ProductDTOResponse {
 			example = "/home/user/Documents/cameriere-system/cameriere-menu/src/main/resources/static/images/cappuccino.jpg"
 	)
 	private String imagePath;
+
+	@Schema(
+			description = "Indicates whether the product is sold out or not.",
+			example = "false"
+	)
+	private Boolean soldOut;
+
+	@Schema(
+			description = "Indicates whether the product is active or not.",
+			example = "true"
+	)
+	private Boolean active;
 }

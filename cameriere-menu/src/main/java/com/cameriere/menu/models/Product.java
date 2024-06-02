@@ -5,15 +5,13 @@ import java.math.BigDecimal;
 import java.util.UUID;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotNull;
 
 import lombok.*;
 
 @Entity
 @Table(name = "tb_product")
 @Getter @Setter @ToString @AllArgsConstructor @NoArgsConstructor
-public class Product extends Standard implements Serializable {
-	private static final long serialVersionUID = 1L;
+public class Product extends Standard {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
@@ -21,7 +19,11 @@ public class Product extends Standard implements Serializable {
 
 	private String name;
 
+	private int quantity;
+
 	private BigDecimal price;
 	
 	private String imagePath;
+
+	private Boolean soldOut;
 }

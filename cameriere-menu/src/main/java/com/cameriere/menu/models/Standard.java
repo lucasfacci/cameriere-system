@@ -35,5 +35,5 @@ public class Standard {
     @Column(insertable = false)
     private String updatedBy;
 
-    private boolean isActive;
+    private Boolean active;
 }
