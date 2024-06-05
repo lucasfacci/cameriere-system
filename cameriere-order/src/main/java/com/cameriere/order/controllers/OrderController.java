@@ -1,116 +1,162 @@
 package com.cameriere.order.controllers;
 
-import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
-import com.cameriere.order.dtos.ProductDTO;
-import com.cameriere.order.producers.OrderProducer;
-import org.springframework.beans.BeanUtils;
+import com.cameriere.order.constants.OrderConstants;
+import com.cameriere.order.dtos.ErrorResponseDTO;
+import com.cameriere.order.dtos.OrderRequestDTO;
+import com.cameriere.order.dtos.ResponseDTO;
+import com.cameriere.order.services.IOrderService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.constraints.Pattern;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
-import com.cameriere.order.dtos.OrderDTO;
-import com.cameriere.order.models.Order;
-import com.cameriere.order.proxies.ProductProxy;
-import com.cameriere.order.services.OrderService;
+import com.cameriere.order.dtos.OrderResponseDTO;
 
 import jakarta.validation.Valid;
 
+@Tag(
+		name = "CRUD REST API for Order in Cameriere System.",
+		description = "CRUD REST API in Cameriere System to CREATE, UPDATE, GET and DELETE orders."
+)
 @RestController
+@RequestMapping(path = "/orders", produces = {MediaType.APPLICATION_JSON_VALUE})
+@AllArgsConstructor
+@Validated
 public class OrderController {
 
-	private final OrderService orderService;
-	private final ProductProxy productProxy;
-	private final OrderProducer orderProducer;
+	private final IOrderService iOrderService;
 
-	public OrderController(OrderService orderService, ProductProxy productProxy, OrderProducer orderProducer) {
-		this.orderService = orderService;
-		this.productProxy = productProxy;
-		this.orderProducer = orderProducer;
+	@Operation(
+			summary = "Get Orders REST API.",
+			description = "REST API to get a list of orders from the Cameriere System."
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "HTTP Status OK."
+	)
+	@GetMapping
+	public ResponseEntity<List<OrderResponseDTO>> listOrders() {
+		return ResponseEntity.status(HttpStatus.OK).body(iOrderService.listOrders());
 	}
-	
-	@GetMapping("/orders")
-	public ResponseEntity<List<Order>> listOrders() {
-		return new ResponseEntity<>(orderService.findAll(), HttpStatus.OK);
+
+	@Operation(
+			summary = "Get Order REST API.",
+			description = "REST API to get a single order from the Cameriere System based on a UUID."
+	)
+	@ApiResponse(
+			responseCode = "200",
+			description = "HTTP Status OK."
+	)
+	@GetMapping("/{id}")
+	public ResponseEntity<Object> getOrder(@PathVariable
+											   @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+													   message = "The id must be a valid UUID.")
+											   String id) {
+		OrderResponseDTO orderResponseDTO = iOrderService.getOrder(id);
+		return ResponseEntity.status(HttpStatus.OK).body(orderResponseDTO);
 	}
 
-	@GetMapping("/orders/{id}")
-	public ResponseEntity<Object> getOrder(@PathVariable UUID id) {
-		Optional<Order> optionalOrderModel = orderService.findById(id);
+	@Operation(
+			summary = "Create Order REST API.",
+			description = "REST API to create a new order in the Cameriere System."
+	)
+	@ApiResponse(
+			responseCode = "201",
+			description = "HTTP Status CREATED."
+	)
+	@PostMapping
+	public ResponseEntity<ResponseDTO> registerOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO) {
+		iOrderService.registerOrder(orderRequestDTO);
+		return ResponseEntity
+				.status(HttpStatus.CREATED)
+				.body(new ResponseDTO(OrderConstants.STATUS_201, OrderConstants.MESSAGE_201));
+	}
 
-		if (optionalOrderModel.isPresent()) {
-			return ResponseEntity.status(HttpStatus.OK).body(optionalOrderModel.get());
+	@Operation(
+			summary = "Update Order REST API.",
+			description = "REST API to update an order in the Cameriere System based on a UUID."
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK."
+			),
+			@ApiResponse(
+					responseCode = "417",
+					description = "Expectation Failed."
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status INTERNAL SERVER ERROR.",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDTO.class)
+					)
+			)
+	})
+	@PutMapping("/{id}")
+	public ResponseEntity<Object> updateOrder(@PathVariable
+												  @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+														  message = "The id must be a valid UUID.")
+												  String id,
+											  @RequestBody @Valid OrderRequestDTO orderRequestDTO) {
+		boolean isUpdated = iOrderService.updateOrder(id, orderRequestDTO);
+		if (isUpdated) {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(new ResponseDTO(OrderConstants.STATUS_200, OrderConstants.MESSAGE_200));
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found");
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new ResponseDTO(OrderConstants.STATUS_417, OrderConstants.MESSAGE_417_UPDATE));
 		}
 	}
 
-	@PostMapping("/orders")
-	public ResponseEntity<Object> saveOrder(@RequestBody @Valid OrderDTO orderDTO) {        
-		var orderModel = new Order();
-		List<String> productsIds = orderDTO.getProducts();
-		BeanUtils.copyProperties(orderDTO, orderModel);
-
-		BigDecimal totalPrice = new BigDecimal("0.00");
-		for (int i = 0; i < productsIds.size(); i++) {
-			ProductDTO product = productProxy.getProduct(productsIds.get(i)).getBody();
-			if (product.getIsActive()) {
-				totalPrice = totalPrice.add(product.getPrice());
-			} else {
-				return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The product " + product.getName() + " is no longer available.");
-			}
-		}
-		orderModel.setTotalPrice(totalPrice);
-		orderService.save(orderModel);
-		orderProducer.send(orderModel.getId() + ";" + orderModel.getTotalPrice() + ";" + orderModel.getCreatedAt() + ";" + orderModel.getProducts());
-		return ResponseEntity.status(HttpStatus.OK).body(orderModel);
-	}
-
-	@PutMapping("/orders/{id}")
-	public ResponseEntity<Object> updateOrder(@PathVariable UUID id, @RequestBody @Valid OrderDTO orderDTO) {
-		Optional<Order> optionalOrderModel = orderService.findById(id);
-
-		if (optionalOrderModel.isPresent()) {
-			List<String> productsIds = orderDTO.getProducts();
-			Order orderModel = optionalOrderModel.get();
-			BeanUtils.copyProperties(orderDTO, orderModel);
-
-			BigDecimal totalPrice = new BigDecimal("0.00");
-			for (int i = 0; i < productsIds.size(); i++) {
-				ProductDTO product = productProxy.getProduct(productsIds.get(i)).getBody();
-				if (product.getIsActive()) {
-					totalPrice = totalPrice.add(product.getPrice());
-				} else {
-					return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The product " + product.getName() + " is no longer available.");
-				}
-			}
-			orderModel.setTotalPrice(totalPrice);
-			return ResponseEntity.status(HttpStatus.OK).body(orderService.save(orderModel));
+	@Operation(
+			summary = "Delete Order REST API.",
+			description = "REST API to delete an order in the Cameriere System."
+	)
+	@ApiResponses({
+			@ApiResponse(
+					responseCode = "200",
+					description = "HTTP Status OK."
+			),
+			@ApiResponse(
+					responseCode = "417",
+					description = "Expectation Failed."
+			),
+			@ApiResponse(
+					responseCode = "500",
+					description = "HTTP Status INTERNAL SERVER ERROR.",
+					content = @Content(
+							schema = @Schema(implementation = ErrorResponseDTO.class)
+					)
+			)
+	})
+	@DeleteMapping("/{id}")
+	public ResponseEntity<Object> deleteOrder(@PathVariable
+												  @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
+														  message = "The id must be a valid UUID.")
+												  String id) {
+		boolean isDeleted = iOrderService.deleteOrder(id);
+		if (isDeleted) {
+			return ResponseEntity
+					.status(HttpStatus.OK)
+					.body(new ResponseDTO(OrderConstants.STATUS_200, OrderConstants.MESSAGE_200));
 		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found.");
-		}
-	}
-
-	@DeleteMapping("/orders/{id}")
-	public ResponseEntity<Object> deleteOrder(@PathVariable UUID id) {
-		Optional<Order> optionalOrderModel = orderService.findById(id);
-
-		if (optionalOrderModel.isPresent()) {
-			Order orderModel = optionalOrderModel.get();
-			orderService.delete(orderModel);
-
-			return ResponseEntity.status(HttpStatus.OK).body("Order successfully deleted.");
-		} else {
-			return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Order not found.");
+			return ResponseEntity
+					.status(HttpStatus.EXPECTATION_FAILED)
+					.body(new ResponseDTO(OrderConstants.STATUS_417, OrderConstants.MESSAGE_417_DELETE));
 		}
 	}
 }

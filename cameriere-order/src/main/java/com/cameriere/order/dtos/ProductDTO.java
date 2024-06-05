@@ -1,36 +1,38 @@
 package com.cameriere.order.dtos;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
 import java.math.BigDecimal;
 
+@Schema(
+        name = "Product",
+        description = "Schema to hold Product information."
+)
+@Data
 public class ProductDTO {
 
+    @Schema(
+            description = "Name of the product.",
+            example = "Cappuccino"
+    )
     private String name;
 
+    @Schema(
+            description = "Price of the product.",
+            example = "5.55"
+    )
     private BigDecimal price;
 
-    private boolean isActive;
+    @Schema(
+            description = "Indicates whether the product is sold out or not.",
+            example = "false"
+    )
+    private Boolean soldOut;
 
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public BigDecimal getPrice() {
-        return price;
-    }
-
-    public void setPrice(BigDecimal price) {
-        this.price = price;
-    }
-
-    public boolean getIsActive() {
-        return isActive;
-    }
-
-    public void setIsActive(boolean isActive) {
-        this.isActive = isActive;
-    }
+    @Schema(
+            description = "Indicates whether the product is active or not.",
+            example = "true"
+    )
+    private Boolean active;
 }
