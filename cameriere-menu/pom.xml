@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.cameriere</groupId>
-	<artifactId>menu</artifactId>
+	<artifactId>cameriere-menu</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<name>menu</name>
+	<name>cameriere-menu</name>
 	<description>Menu Microservice</description>
 	<properties>
 		<java.version>17</java.version>
