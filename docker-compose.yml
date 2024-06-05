@@ -1,8 +1,74 @@
 services:
-    rabbitmq:
-        image: rabbitmq:3-management
-        container_name: rabbitmq
-        restart: always
-        ports:
-            - 5672:5672
-            - 15672:15672
+  cameriere-config-server:
+    image: "lucasfacci/cameriere-config-server:0.0.1"
+    container_name: config-server-ms
+    ports:
+      - "8888:8888"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+    networks:
+      - cameriere-network
+  cameriere-eureka:
+    image: "lucasfacci/cameriere-eureka:0.0.1"
+    container_name: eureka-ms
+    ports:
+      - "8761:8761"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+#    depends_on:
+#      - cameriere-config-server
+    networks:
+      - cameriere-network
+  cameriere-gateway:
+    image: "lucasfacci/cameriere-gateway:0.0.1"
+    container_name: gateway-ms
+    ports:
+      - "7000:7000"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+#    depends_on:
+#      - cameriere-eureka
+    networks:
+      - cameriere-network
+  cameriere-menu:
+    image: "lucasfacci/cameriere-menu:0.0.1"
+    container_name: menu-ms
+    ports:
+      - "8080:8080"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+#    depends_on:
+#      - cameriere-eureka
+    networks:
+      - cameriere-network
+  cameriere-order:
+    image: "lucasfacci/cameriere-order:0.0.1"
+    container_name: order-ms
+    ports:
+      - "8081:8081"
+    deploy:
+      resources:
+        limits:
+          memory: 700m
+#    depends_on:
+#      - cameriere-eureka
+    networks:
+      - cameriere-network
+#  rabbitmq:
+#    image: rabbitmq:3-management
+#    container_name: rabbitmq
+#    restart: always
+#    ports:
+#      - 5672:5672
+#      - 15672:15672
+networks:
+  cameriere-network:
+    driver: "bridge"
