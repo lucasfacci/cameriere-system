@@ -1,8 +1,29 @@
 server:
   port: 8888
+
 spring:
+  application:
+    name: config-server
+  profiles:
+#    active: native
+    active: git
   cloud:
     config:
       server:
+#        native:
+#          search-locations: "classpath:/configs"
         git:
-          uri: ${HOME}/config
+          uri: "https://github.com/lucasfacci/cameriere-system-configs.git"
+          default-label: main
+          timeout: 5
+          clone-on-start: true
+          force-pull: true
+  # RABBITMQ
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+
+encrypt:
+  key: "6SWGRSr7NH9RKtEH9c2kl"
