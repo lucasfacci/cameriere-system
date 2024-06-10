@@ -6,7 +6,7 @@ public class ProductConstants {
         // restrict instantiation
     }
 
-    public static final String IMAGES_LOCATION = "/home/lucas/Documents/Workspace/cameriere-system/cameriere-menu/src/main/resources/static/images";
+    public static final String IMAGES_LOCATION = "/home/lucas/Documents/Workspace/cameriere-system/menu/src/main/resources/static/images";
     public static final String STATUS_201 = "201";
     public static final String MESSAGE_201 = "Product created successfully.";
     public static final String STATUS_200 = "200";
