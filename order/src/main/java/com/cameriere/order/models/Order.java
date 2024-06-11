@@ -1,9 +1,7 @@
 package com.cameriere.order.models;
 
-import java.io.Serializable;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.UUID;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -19,11 +17,11 @@ public class Order extends Standard {
 	
 	@Id
 	@GeneratedValue(strategy = GenerationType.AUTO)
-	private UUID id;
+	private Long id;
 
 	private int tableNumber;
 
 	private BigDecimal totalPrice;
 
-	private List<String> products;
+	private List<Long> products;
 }

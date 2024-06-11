@@ -54,7 +54,7 @@ public class ProductController {
 
 	@Operation(
 			summary = "Get Product REST API.",
-			description = "REST API to get a single product from the Cameriere System based on a UUID."
+			description = "REST API to get a single product from the Cameriere System based on an ID."
 	)
 	@ApiResponse(
 			responseCode = "200",
@@ -62,9 +62,7 @@ public class ProductController {
 	)
 	@GetMapping("/{id}")
 	public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable
-															 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-																	 message = "The id must be a valid UUID.")
-															 String id) {
+															 Long id) {
 		ProductResponseDTO productResponseDTO = iProductService.getProduct(id);
 		return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
 	}
@@ -88,7 +86,7 @@ public class ProductController {
 
 	@Operation(
 			summary = "Update Product REST API.",
-			description = "REST API to update a product in the Cameriere System based on a UUID."
+			description = "REST API to update a product in the Cameriere System based on a ID."
 	)
 	@ApiResponses({
 			@ApiResponse(
@@ -109,9 +107,7 @@ public class ProductController {
 	})
 	@PutMapping("/{id}")
 	public ResponseEntity<ResponseDTO> updateProduct(@PathVariable
-														 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-																 message = "The id must be a valid UUID.")
-														 String id,
+														 Long id,
 													 @Valid ProductRequestDTO productRequestDTO,
 													 @RequestParam(required = false) MultipartFile file) throws IOException {
 		boolean isUpdated = iProductService.updateProduct(id, productRequestDTO, file);
@@ -149,9 +145,7 @@ public class ProductController {
 	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseDTO> deleteProduct(@PathVariable
-														 @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-																 message = "The id must be a valid UUID.")
-														 String id) {
+														 Long id) {
 		boolean isDeleted = iProductService.deleteProduct(id);
 		if (isDeleted) {
 			return ResponseEntity

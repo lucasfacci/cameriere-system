@@ -6,9 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
-@FeignClient(name = "cameriere-menu")
+@FeignClient(name = "menu")
 public interface ProductProxy {
 
 	@GetMapping("/products/{id}")
-	ResponseEntity<ProductDTO> getProduct(@PathVariable String id);
+	ResponseEntity<ProductDTO> getProduct(@PathVariable Long id);
 }

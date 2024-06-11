@@ -20,7 +20,7 @@ public interface IProductService {
      * @param id - Input ID
      * @return A product based on a given ID
      */
-    ProductResponseDTO getProduct(String id);
+    ProductResponseDTO getProduct(Long id);
 
     /**
      *
@@ -38,12 +38,12 @@ public interface IProductService {
      * @return boolean indicating whether the product update was successful or not
      * @throws IOException IOException if there is an error reading from or writing to the file system
      */
-    boolean updateProduct(String id, ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException;
+    boolean updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException;
 
     /**
      *
      * @param id - Input ID
      * @return boolean indicating whether the product deletion was successful or not
      */
-    boolean deleteProduct(String id);
+    boolean deleteProduct(Long id);
 }

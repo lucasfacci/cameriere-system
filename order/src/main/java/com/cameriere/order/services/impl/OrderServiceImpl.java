@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @AllArgsConstructor
@@ -34,8 +33,8 @@ public class OrderServiceImpl implements IOrderService {
 
         for (Order order: orders) {
             List<ProductDTO> products = new ArrayList<>();
-            for (String id: order.getProducts()) {
-                ProductDTO productDTO = productProxy.getProduct(id).getBody();
+            for (Long productId: order.getProducts()) {
+                ProductDTO productDTO = productProxy.getProduct(productId).getBody();
                 products.add(productDTO);
             }
             OrderResponseDTO orderResponseDTO = OrderMapper.mapToOrderResponseDTOFromOrder(order, new OrderResponseDTO());
@@ -51,13 +50,13 @@ public class OrderServiceImpl implements IOrderService {
      * @return An order based on a given ID
      */
     @Override
-    public OrderResponseDTO getOrder(String id) {
-        Order order = orderRepository.findById(UUID.fromString(id)).orElseThrow(
-                () -> new ResourceNotFoundException("Order", "id", id)
+    public OrderResponseDTO getOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Order", "id", id.toString())
         );
 
         List<ProductDTO> products = new ArrayList<>();
-        for (String productId: order.getProducts()) {
+        for (Long productId: order.getProducts()) {
             ProductDTO productDTO = productProxy.getProduct(productId).getBody();
             products.add(productDTO);
         }
@@ -75,12 +74,12 @@ public class OrderServiceImpl implements IOrderService {
         Order order = OrderMapper.mapToOrderFromOrderRequestDTO(orderRequestDTO, new Order());
 
         BigDecimal totalPrice = new BigDecimal("0.00");
-        for (String productId: orderRequestDTO.getProducts()) {
+        for (Long productId: orderRequestDTO.getProducts()) {
             ProductDTO product = productProxy.getProduct(productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
-                throw new ResourceNotFoundException("Product", "id", productId);
+                throw new ResourceNotFoundException("Product", "id", productId.toString());
 //                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The product " + product.getName() + " is no longer available.");
             }
         }
@@ -95,18 +94,18 @@ public class OrderServiceImpl implements IOrderService {
      * @return boolean indicating whether the product update was successful or not
      */
     @Override
-    public boolean updateOrder(String id, OrderRequestDTO orderRequestDTO) {
-        Order order = orderRepository.findById(UUID.fromString(id)).orElseThrow(
-                () -> new ResourceNotFoundException("Order", "id", id)
+    public boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Order", "id", id.toString())
         );
 
         BigDecimal totalPrice = new BigDecimal("0.00");
-        for (String productId: orderRequestDTO.getProducts()) {
+        for (Long productId: orderRequestDTO.getProducts()) {
             ProductDTO product = productProxy.getProduct(productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
-                throw new ResourceNotFoundException("Product", "id", productId);
+                throw new ResourceNotFoundException("Product", "id", productId.toString());
             }
         }
 
@@ -122,9 +121,9 @@ public class OrderServiceImpl implements IOrderService {
      * @return boolean indicating whether the product deletion was successful or not
      */
     @Override
-    public boolean deleteOrder(String id) {
-        Order order = orderRepository.findById(UUID.fromString(id)).orElseThrow(
-                () -> new ResourceNotFoundException("Order", "id", id)
+    public boolean deleteOrder(Long id) {
+        Order order = orderRepository.findById(id).orElseThrow(
+                () -> new ResourceNotFoundException("Order", "id", id.toString())
         );
 
         orderRepository.deleteById(order.getId());

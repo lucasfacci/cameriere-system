@@ -13,7 +13,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -52,7 +51,7 @@ public class OrderController {
 
 	@Operation(
 			summary = "Get Order REST API.",
-			description = "REST API to get a single order from the Cameriere System based on a UUID."
+			description = "REST API to get a single order from the Cameriere System based on an ID."
 	)
 	@ApiResponse(
 			responseCode = "200",
@@ -60,9 +59,7 @@ public class OrderController {
 	)
 	@GetMapping("/{id}")
 	public ResponseEntity<Object> getOrder(@PathVariable
-											   @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-													   message = "The id must be a valid UUID.")
-											   String id) {
+											   Long id) {
 		OrderResponseDTO orderResponseDTO = iOrderService.getOrder(id);
 		return ResponseEntity.status(HttpStatus.OK).body(orderResponseDTO);
 	}
@@ -85,7 +82,7 @@ public class OrderController {
 
 	@Operation(
 			summary = "Update Order REST API.",
-			description = "REST API to update an order in the Cameriere System based on a UUID."
+			description = "REST API to update an order in the Cameriere System based on a ID."
 	)
 	@ApiResponses({
 			@ApiResponse(
@@ -106,9 +103,7 @@ public class OrderController {
 	})
 	@PutMapping("/{id}")
 	public ResponseEntity<Object> updateOrder(@PathVariable
-												  @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-														  message = "The id must be a valid UUID.")
-												  String id,
+												  Long id,
 											  @RequestBody @Valid OrderRequestDTO orderRequestDTO) {
 		boolean isUpdated = iOrderService.updateOrder(id, orderRequestDTO);
 		if (isUpdated) {
@@ -145,9 +140,7 @@ public class OrderController {
 	})
 	@DeleteMapping("/{id}")
 	public ResponseEntity<Object> deleteOrder(@PathVariable
-												  @Pattern(regexp = "[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}",
-														  message = "The id must be a valid UUID.")
-												  String id) {
+												  Long id) {
 		boolean isDeleted = iOrderService.deleteOrder(id);
 		if (isDeleted) {
 			return ResponseEntity

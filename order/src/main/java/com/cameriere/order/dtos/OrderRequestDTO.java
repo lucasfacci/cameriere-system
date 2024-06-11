@@ -24,7 +24,7 @@ public class OrderRequestDTO {
 
 	@Schema(
 			description = "List of product IDs.",
-			example = "[\"607cee21-15be-4e41-8f89-8d0590444cb9\", \"c6841f28-7931-483b-b194-f0437f20a8be\"]"
+			example = "[\"1\", \"4\"]"
 	)
-	private List<String> products;
+	private List<Long> products;
 }

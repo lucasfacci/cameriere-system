@@ -3,7 +3,6 @@ package com.cameriere.order.services;
 import com.cameriere.order.dtos.OrderRequestDTO;
 import com.cameriere.order.dtos.OrderResponseDTO;
 
-import java.io.IOException;
 import java.util.List;
 
 public interface IOrderService {
@@ -19,7 +18,7 @@ public interface IOrderService {
      * @param id - Input ID
      * @return An order based on a given ID
      */
-    OrderResponseDTO getOrder(String id);
+    OrderResponseDTO getOrder(Long id);
 
     /**
      *
@@ -33,12 +32,12 @@ public interface IOrderService {
      * @param orderRequestDTO - OrderRequestDTO Object
      * @return boolean indicating whether the product update was successful or not
      */
-    boolean updateOrder(String id, OrderRequestDTO orderRequestDTO);
+    boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO);
 
     /**
      *
      * @param id - Input ID
      * @return boolean indicating whether the order deletion was successful or not
      */
-    boolean deleteOrder(String id);
+    boolean deleteOrder(Long id);
 }

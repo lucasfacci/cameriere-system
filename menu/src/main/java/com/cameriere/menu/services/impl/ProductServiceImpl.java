@@ -52,9 +52,9 @@ public class ProductServiceImpl implements IProductService {
 	 * @return A product based on a given ID
 	 */
 	@Override
-	public ProductResponseDTO getProduct(String id) {
-		Product product = productRepository.findById(UUID.fromString(id)).orElseThrow(
-				() -> new ResourceNotFoundException("Product", "id", id)
+	public ProductResponseDTO getProduct(Long id) {
+		Product product = productRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("Product", "id", id.toString())
 		);
 
         return ProductMapper.mapToProductResponseDTOFromProduct(product, new ProductResponseDTO());
@@ -100,11 +100,11 @@ public class ProductServiceImpl implements IProductService {
 	 * @throws IOException IOException if there is an error reading from or writing to the file system
 	 */
 	@Override
-	public boolean updateProduct(String id, ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException {
+	public boolean updateProduct(Long id, ProductRequestDTO productRequestDTO, MultipartFile file) throws IOException {
 		String uploadDirectory = ProductConstants.IMAGES_LOCATION;
 
-		Product product = productRepository.findById(UUID.fromString(id)).orElseThrow(
-				() -> new ResourceNotFoundException("Product", "id", id)
+		Product product = productRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("Product", "id", id.toString())
 		);
 
 		Boolean active = true;
@@ -144,9 +144,9 @@ public class ProductServiceImpl implements IProductService {
 	 * @return boolean indicating whether the product deletion was successful or not
 	 */
 	@Override
-	public boolean deleteProduct(String id) {
-		Product product = productRepository.findById(UUID.fromString(id)).orElseThrow(
-				() -> new ResourceNotFoundException("Product", "id", id)
+	public boolean deleteProduct(Long id) {
+		Product product = productRepository.findById(id).orElseThrow(
+				() -> new ResourceNotFoundException("Product", "id", id.toString())
 		);
 
 		File oldFile = new File(product.getImagePath());
