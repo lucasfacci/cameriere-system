@@ -1,4 +1,4 @@
-package com.cameriere.order.proxies;
+package com.cameriere.order.services.clients;
 
 import com.cameriere.order.dtos.ProductDTO;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 @FeignClient(name = "menu")
-public interface ProductProxy {
+public interface ProductFeignClient {
 
-	@GetMapping("/products/{id}")
+	@GetMapping(value = "/products/{id}", consumes = "application/json")
 	ResponseEntity<ProductDTO> getProduct(@PathVariable Long id);
 }

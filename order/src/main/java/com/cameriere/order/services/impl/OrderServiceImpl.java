@@ -6,7 +6,7 @@ import com.cameriere.order.dtos.ProductDTO;
 import com.cameriere.order.exceptions.ResourceNotFoundException;
 import com.cameriere.order.mappers.OrderMapper;
 import com.cameriere.order.models.Order;
-import com.cameriere.order.proxies.ProductProxy;
+import com.cameriere.order.services.clients.ProductFeignClient;
 import com.cameriere.order.repositories.OrderRepository;
 import com.cameriere.order.services.IOrderService;
 import lombok.AllArgsConstructor;
@@ -21,7 +21,7 @@ import java.util.List;
 public class OrderServiceImpl implements IOrderService {
 
     private OrderRepository orderRepository;
-    private ProductProxy productProxy;
+    private ProductFeignClient productFeignClient;
 
     /**
      * @return All the orders
@@ -34,7 +34,7 @@ public class OrderServiceImpl implements IOrderService {
         for (Order order: orders) {
             List<ProductDTO> products = new ArrayList<>();
             for (Long productId: order.getProducts()) {
-                ProductDTO productDTO = productProxy.getProduct(productId).getBody();
+                ProductDTO productDTO = productFeignClient.getProduct(productId).getBody();
                 products.add(productDTO);
             }
             OrderResponseDTO orderResponseDTO = OrderMapper.mapToOrderResponseDTOFromOrder(order, new OrderResponseDTO());
@@ -57,7 +57,7 @@ public class OrderServiceImpl implements IOrderService {
 
         List<ProductDTO> products = new ArrayList<>();
         for (Long productId: order.getProducts()) {
-            ProductDTO productDTO = productProxy.getProduct(productId).getBody();
+            ProductDTO productDTO = productFeignClient.getProduct(productId).getBody();
             products.add(productDTO);
         }
 
@@ -75,7 +75,7 @@ public class OrderServiceImpl implements IOrderService {
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productProxy.getProduct(productId).getBody();
+            ProductDTO product = productFeignClient.getProduct(productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
@@ -101,7 +101,7 @@ public class OrderServiceImpl implements IOrderService {
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productProxy.getProduct(productId).getBody();
+            ProductDTO product = productFeignClient.getProduct(productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
