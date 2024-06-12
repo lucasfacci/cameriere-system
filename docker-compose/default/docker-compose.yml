@@ -88,7 +88,7 @@ services:
       service: microservice-config-server-configs
 
   menu:
-    image: "lucasfacci/menu:0.0.2"
+    image: "lucasfacci/menu:0.0.3"
     container_name: menu-ms
     ports:
       - "8080:8080"
@@ -105,7 +105,7 @@ services:
       service: microservice-config-server-configs
 
   order:
-    image: "lucasfacci/order:0.0.2"
+    image: "lucasfacci/order:0.0.3"
     container_name: order-ms
     ports:
       - "8081:8081"
