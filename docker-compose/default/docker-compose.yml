@@ -71,7 +71,7 @@ services:
       start_period: 10s
     extends:
       file: common-configs.yml
-      service: microservice-config-server-configs
+      service: microservice-base-configs
 
   gateway:
     image: "lucasfacci/gateway:0.0.1"
@@ -80,9 +80,6 @@ services:
       - "7000:7000"
     environment:
       SPRING_APPLICATION_NAME: "gateway"
-    depends_on:
-      eureka:
-        condition: service_healthy
     extends:
       file: common-configs.yml
       service: microservice-config-server-configs
@@ -98,8 +95,6 @@ services:
     depends_on:
       menudb:
         condition: service_healthy
-      eureka:
-        condition: service_healthy
     extends:
       file: common-configs.yml
       service: microservice-config-server-configs
@@ -114,8 +109,6 @@ services:
       SPRING_DATASOURCE_URL: "jdbc:mysql://ordersdb:3306/ordersdb"
     depends_on:
       ordersdb:
-        condition: service_healthy
-      eureka:
         condition: service_healthy
     extends:
       file: common-configs.yml
