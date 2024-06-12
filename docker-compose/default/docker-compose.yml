@@ -100,7 +100,7 @@ services:
       service: microservice-config-server-configs
 
   order:
-    image: "lucasfacci/order:0.0.3"
+    image: "lucasfacci/order:0.0.4"
     container_name: order-ms
     ports:
       - "8081:8081"
