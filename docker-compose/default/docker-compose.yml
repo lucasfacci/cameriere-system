@@ -54,7 +54,7 @@ services:
       service: microservice-base-configs
 
   eureka:
-    image: "lucasfacci/eureka:0.0.2"
+    image: "lucasfacci/eureka:0.0.1"
     container_name: eureka-ms
     ports:
       - "8761:8761"
@@ -73,24 +73,8 @@ services:
       file: common-configs.yml
       service: microservice-config-server-configs
 
-  gateway:
-    image: "lucasfacci/gateway:0.0.1"
-    container_name: gateway-ms
-    ports:
-      - "7000:7000"
-    environment:
-      SPRING_APPLICATION_NAME: "gateway"
-    depends_on:
-      config-server:
-        condition: service_healthy
-      eureka:
-        condition: service_healthy
-    extends:
-      file: common-configs.yml
-      service: microservice-eureka-configs
-
   menu:
-    image: "lucasfacci/menu:0.0.3"
+    image: "lucasfacci/menu:0.0.5"
     container_name: menu-ms
     ports:
       - "8080:8080"
@@ -104,12 +88,18 @@ services:
         condition: service_healthy
       eureka:
         condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8080/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
     extends:
       file: common-configs.yml
       service: microservice-eureka-configs
 
   order:
-    image: "lucasfacci/order:0.0.4"
+    image: "lucasfacci/order:0.0.6"
     container_name: order-ms
     ports:
       - "8081:8081"
@@ -122,6 +112,28 @@ services:
       config-server:
         condition: service_healthy
       eureka:
+        condition: service_healthy
+    healthcheck:
+      test: "curl --fail --silent localhost:8081/actuator/health/readiness | grep UP || exit 1"
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    extends:
+      file: common-configs.yml
+      service: microservice-eureka-configs
+
+  gateway:
+    image: "lucasfacci/gateway:0.0.1"
+    container_name: gateway-ms
+    ports:
+      - "7000:7000"
+    environment:
+      SPRING_APPLICATION_NAME: "gateway"
+    depends_on:
+      menu:
+        condition: service_healthy
+      order:
         condition: service_healthy
     extends:
       file: common-configs.yml
