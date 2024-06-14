@@ -18,6 +18,8 @@ import jakarta.validation.Valid;
 
 import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -36,6 +38,8 @@ import com.cameriere.menu.dtos.ProductResponseDTO;
 @AllArgsConstructor
 @Validated
 public class ProductController {
+
+	private static final Logger logger = LoggerFactory.getLogger(ProductController.class);
 
 	private IProductService iProductService;
 
@@ -61,8 +65,10 @@ public class ProductController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable
+	public ResponseEntity<ProductResponseDTO> getProduct(@RequestHeader("cameriere-correlation-id") String correlationId,
+														 @PathVariable
 															 Long id) {
+		logger.debug("cameriere-correlation-id found: {}", correlationId);
 		ProductResponseDTO productResponseDTO = iProductService.getProduct(id);
 		return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
 	}

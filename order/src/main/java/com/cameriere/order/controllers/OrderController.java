@@ -14,6 +14,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +36,8 @@ import jakarta.validation.Valid;
 @Validated
 public class OrderController {
 
+	private static final Logger logger = LoggerFactory.getLogger(OrderController.class);
+
 	private final IOrderService iOrderService;
 
 	@Operation(
@@ -45,8 +49,9 @@ public class OrderController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping
-	public ResponseEntity<List<OrderResponseDTO>> listOrders() {
-		return ResponseEntity.status(HttpStatus.OK).body(iOrderService.listOrders());
+	public ResponseEntity<List<OrderResponseDTO>> listOrders(@RequestHeader("cameriere-correlation-id") String correlationId) {
+		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		return ResponseEntity.status(HttpStatus.OK).body(iOrderService.listOrders(correlationId));
 	}
 
 	@Operation(
@@ -58,9 +63,11 @@ public class OrderController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping("/{id}")
-	public ResponseEntity<Object> getOrder(@PathVariable
+	public ResponseEntity<Object> getOrder(@RequestHeader("cameriere-correlation-id") String correlationId,
+											@PathVariable
 											   Long id) {
-		OrderResponseDTO orderResponseDTO = iOrderService.getOrder(id);
+		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		OrderResponseDTO orderResponseDTO = iOrderService.getOrder(id, correlationId);
 		return ResponseEntity.status(HttpStatus.OK).body(orderResponseDTO);
 	}
 
@@ -73,8 +80,10 @@ public class OrderController {
 			description = "HTTP Status CREATED."
 	)
 	@PostMapping
-	public ResponseEntity<ResponseDTO> registerOrder(@RequestBody @Valid OrderRequestDTO orderRequestDTO) {
-		iOrderService.registerOrder(orderRequestDTO);
+	public ResponseEntity<ResponseDTO> registerOrder(@RequestHeader("cameriere-correlation-id") String correlationId,
+													 @RequestBody @Valid OrderRequestDTO orderRequestDTO) {
+		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		iOrderService.registerOrder(orderRequestDTO, correlationId);
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
 				.body(new ResponseDTO(OrderConstants.STATUS_201, OrderConstants.MESSAGE_201));
@@ -102,10 +111,12 @@ public class OrderController {
 			)
 	})
 	@PutMapping("/{id}")
-	public ResponseEntity<Object> updateOrder(@PathVariable
+	public ResponseEntity<Object> updateOrder(@RequestHeader("cameriere-correlation-id") String correlationId,
+											  @PathVariable
 												  Long id,
 											  @RequestBody @Valid OrderRequestDTO orderRequestDTO) {
-		boolean isUpdated = iOrderService.updateOrder(id, orderRequestDTO);
+		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		boolean isUpdated = iOrderService.updateOrder(id, orderRequestDTO, correlationId);
 		if (isUpdated) {
 			return ResponseEntity
 					.status(HttpStatus.OK)

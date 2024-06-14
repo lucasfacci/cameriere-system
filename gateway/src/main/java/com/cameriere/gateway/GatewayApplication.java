@@ -1,13 +1,14 @@
 package com.cameriere.gateway;
 
-import reactor.core.publisher.Mono;
-
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.cloud.gateway.route.RouteLocator;
+import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
+import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.WebSession;
+
+import java.time.LocalDateTime;
 
 @SpringBootApplication
 @EnableDiscoveryClient
@@ -18,8 +19,19 @@ public class GatewayApplication {
 		SpringApplication.run(GatewayApplication.class, args);
 	}
 
-    @GetMapping("/")
-    public Mono<String> index(WebSession session) {
-        return Mono.just(session.getId());
-    }
+	@Bean
+	public RouteLocator cameriereRouteConfig(RouteLocatorBuilder routeLocatorBuilder) {
+		return routeLocatorBuilder.routes()
+				.route(p -> p
+						.path("/cameriere/menu/**")
+						.filters(f -> f.rewritePath("/cameriere/menu/(?<segment>.*)", "/${segment}")
+								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+						.uri("lb://MENU"))
+				.route(p -> p
+						.path("/cameriere/order/**")
+						.filters(f -> f.rewritePath("/cameriere/order/(?<segment>.*)", "/${segment}")
+								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+						.uri("lb://ORDER")).build();
+	}
+
 }

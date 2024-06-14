@@ -24,17 +24,19 @@ public class OrderServiceImpl implements IOrderService {
     private ProductFeignClient productFeignClient;
 
     /**
+     *
+     * @param correlationId - UUID to trace the request
      * @return All the orders
      */
     @Override
-    public List<OrderResponseDTO> listOrders() {
+    public List<OrderResponseDTO> listOrders(String correlationId) {
         List<Order> orders = orderRepository.findAll();
         List<OrderResponseDTO> orderResponseDTOs = new ArrayList<>();
 
         for (Order order: orders) {
             List<ProductDTO> products = new ArrayList<>();
             for (Long productId: order.getProducts()) {
-                ProductDTO productDTO = productFeignClient.getProduct(productId).getBody();
+                ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
                 products.add(productDTO);
             }
             OrderResponseDTO orderResponseDTO = OrderMapper.mapToOrderResponseDTOFromOrder(order, new OrderResponseDTO());
@@ -46,18 +48,20 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     /**
+     *
      * @param id - Input ID
+     * @param correlationId - UUID to trace the request
      * @return An order based on a given ID
      */
     @Override
-    public OrderResponseDTO getOrder(Long id) {
+    public OrderResponseDTO getOrder(Long id, String correlationId) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Order", "id", id.toString())
         );
 
         List<ProductDTO> products = new ArrayList<>();
         for (Long productId: order.getProducts()) {
-            ProductDTO productDTO = productFeignClient.getProduct(productId).getBody();
+            ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
             products.add(productDTO);
         }
 
@@ -67,15 +71,17 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     /**
+     *
      * @param orderRequestDTO - OrderRequestDTO Object
+     * @param correlationId - UUID to trace the request
      */
     @Override
-    public void registerOrder(OrderRequestDTO orderRequestDTO) {
+    public void registerOrder(OrderRequestDTO orderRequestDTO, String correlationId) {
         Order order = OrderMapper.mapToOrderFromOrderRequestDTO(orderRequestDTO, new Order());
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productFeignClient.getProduct(productId).getBody();
+            ProductDTO product = productFeignClient.getProduct(correlationId, productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
@@ -89,19 +95,21 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     /**
-     * @param id              - Input ID
+     *
+     * @param id - Input ID
      * @param orderRequestDTO - OrderRequestDTO Object
+     * @param correlationId - UUID to trace the request
      * @return boolean indicating whether the product update was successful or not
      */
     @Override
-    public boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO) {
+    public boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO, String correlationId) {
         Order order = orderRepository.findById(id).orElseThrow(
                 () -> new ResourceNotFoundException("Order", "id", id.toString())
         );
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productFeignClient.getProduct(productId).getBody();
+            ProductDTO product = productFeignClient.getProduct(correlationId, productId).getBody();
             if (product.getActive()) {
                 totalPrice = totalPrice.add(product.getPrice());
             } else {
