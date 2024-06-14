@@ -71,7 +71,7 @@ services:
       start_period: 10s
     extends:
       file: common-configs.yml
-      service: microservice-base-configs
+      service: microservice-config-server-configs
 
   gateway:
     image: "lucasfacci/gateway:0.0.1"
@@ -80,9 +80,14 @@ services:
       - "7000:7000"
     environment:
       SPRING_APPLICATION_NAME: "gateway"
+    depends_on:
+      config-server:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
     extends:
       file: common-configs.yml
-      service: microservice-config-server-configs
+      service: microservice-eureka-configs
 
   menu:
     image: "lucasfacci/menu:0.0.3"
@@ -95,9 +100,13 @@ services:
     depends_on:
       menudb:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
     extends:
       file: common-configs.yml
-      service: microservice-config-server-configs
+      service: microservice-eureka-configs
 
   order:
     image: "lucasfacci/order:0.0.4"
@@ -110,9 +119,13 @@ services:
     depends_on:
       ordersdb:
         condition: service_healthy
+      config-server:
+        condition: service_healthy
+      eureka:
+        condition: service_healthy
     extends:
       file: common-configs.yml
-      service: microservice-config-server-configs
+      service: microservice-eureka-configs
 
 networks:
   cameriere-network:
