@@ -25,7 +25,8 @@ public class GatewayApplication {
 				.route(p -> p
 						.path("/cameriere/menu/**")
 						.filters(f -> f.rewritePath("/cameriere/menu/(?<segment>.*)", "/${segment}")
-								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString()))
+								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+								.circuitBreaker(config -> config.setName("menuCircuitBreaker")))
 						.uri("lb://MENU"))
 				.route(p -> p
 						.path("/cameriere/order/**")
