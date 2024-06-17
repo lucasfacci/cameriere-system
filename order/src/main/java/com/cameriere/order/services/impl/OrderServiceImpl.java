@@ -10,6 +10,7 @@ import com.cameriere.order.services.clients.ProductFeignClient;
 import com.cameriere.order.repositories.OrderRepository;
 import com.cameriere.order.services.IOrderService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -36,9 +37,12 @@ public class OrderServiceImpl implements IOrderService {
         for (Order order: orders) {
             List<ProductDTO> products = new ArrayList<>();
             for (Long productId: order.getProducts()) {
-                ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
-                products.add(productDTO);
+                ResponseEntity<ProductDTO> productDTOResponseEntity = productFeignClient.getProduct(correlationId, productId);
+                if (null != productDTOResponseEntity) {
+                    products.add(productDTOResponseEntity.getBody());
+                }
             }
+
             OrderResponseDTO orderResponseDTO = OrderMapper.mapToOrderResponseDTOFromOrder(order, new OrderResponseDTO());
             orderResponseDTO.setProducts(products);
             orderResponseDTOs.add(orderResponseDTO);
@@ -61,8 +65,10 @@ public class OrderServiceImpl implements IOrderService {
 
         List<ProductDTO> products = new ArrayList<>();
         for (Long productId: order.getProducts()) {
-            ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
-            products.add(productDTO);
+            ResponseEntity<ProductDTO> productDTOResponseEntity = productFeignClient.getProduct(correlationId, productId);
+            if (null != productDTOResponseEntity) {
+                products.add(productDTOResponseEntity.getBody());
+            }
         }
 
         OrderResponseDTO orderResponseDTO = OrderMapper.mapToOrderResponseDTOFromOrder(order, new OrderResponseDTO());
@@ -81,16 +87,14 @@ public class OrderServiceImpl implements IOrderService {
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productFeignClient.getProduct(correlationId, productId).getBody();
-            if (product.getActive()) {
-                totalPrice = totalPrice.add(product.getPrice());
+            ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
+            if (productDTO.getActive()) {
+                totalPrice = totalPrice.add(productDTO.getPrice());
             } else {
                 throw new ResourceNotFoundException("Product", "id", productId.toString());
-//                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body("The product " + product.getName() + " is no longer available.");
             }
         }
         order.setTotalPrice(totalPrice);
-//        orderProducer.send(order.getId() + ";" + order.getTotalPrice() + ";" + order.getCreatedAt() + ";" + order.getProducts());
         orderRepository.save(order);
     }
 
@@ -109,9 +113,9 @@ public class OrderServiceImpl implements IOrderService {
 
         BigDecimal totalPrice = new BigDecimal("0.00");
         for (Long productId: orderRequestDTO.getProducts()) {
-            ProductDTO product = productFeignClient.getProduct(correlationId, productId).getBody();
-            if (product.getActive()) {
-                totalPrice = totalPrice.add(product.getPrice());
+            ProductDTO productDTO = productFeignClient.getProduct(correlationId, productId).getBody();
+            if (productDTO.getActive()) {
+                totalPrice = totalPrice.add(productDTO.getPrice());
             } else {
                 throw new ResourceNotFoundException("Product", "id", productId.toString());
             }

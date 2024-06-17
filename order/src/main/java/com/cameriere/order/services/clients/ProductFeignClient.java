@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestHeader;
 
-@FeignClient(name = "menu")
+@FeignClient(name = "menu", fallback = ProductFallback.class)
 public interface ProductFeignClient {
 
 	@GetMapping(value = "/products/{id}", consumes = "application/json")
