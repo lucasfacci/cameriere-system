@@ -19,6 +19,18 @@ services:
       file: common-configs.yml
       service: microservice-db-configs
 
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep PONG"]
+      timeout: 10s
+      retries: 10
+    extends:
+      file: common-configs.yml
+      service: network-deploy-service
+
   rabbit:
     image: rabbitmq:3.13-management
     hostname: rabbitmq
@@ -99,7 +111,7 @@ services:
       service: microservice-eureka-configs
 
   order:
-    image: "lucasfacci/order:0.0.6"
+    image: "lucasfacci/order:0.0.7"
     container_name: order-ms
     ports:
       - "8081:8081"
@@ -124,16 +136,22 @@ services:
       service: microservice-eureka-configs
 
   gateway:
-    image: "lucasfacci/gateway:0.0.1"
+    image: "lucasfacci/gateway:0.0.2"
     container_name: gateway-ms
     ports:
       - "7000:7000"
     environment:
       SPRING_APPLICATION_NAME: "gateway"
+      SPRING_DATA_REDIS_CONNECT-TIMEOUT: 2s
+      SPRING_DATA_REDIS_HOST: redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_TIMEOUT: 1s
     depends_on:
       menu:
         condition: service_healthy
       order:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     extends:
       file: common-configs.yml
