@@ -43,6 +43,8 @@ public class GatewayApplication {
 						.path("/cameriere/order/**")
 						.filters(f -> f.rewritePath("/cameriere/order/(?<segment>.*)", "/${segment}")
 								.addResponseHeader("X-Response-Time", LocalDateTime.now().toString())
+								.circuitBreaker(config -> config.setName("orderCircuitBreaker")
+										.setFallbackUri("forward:/contactSupport"))
 								.retry(retryConfig -> retryConfig.setRetries(3)
 										.setMethods(HttpMethod.GET)
 										.setBackoff(Duration.ofMillis(100), Duration.ofMillis(1000), 2, true))
