@@ -66,7 +66,7 @@ public class OrderController {
 	public ResponseEntity<Object> getOrder(@RequestHeader("cameriere-correlation-id") String correlationId,
 											@PathVariable
 											   Long id) {
-		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		logger.debug("getOrder method start");
 		OrderResponseDTO orderResponseDTO = iOrderService.getOrder(id, correlationId);
 		return ResponseEntity.status(HttpStatus.OK).body(orderResponseDTO);
 	}
