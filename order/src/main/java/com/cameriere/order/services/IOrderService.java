@@ -9,34 +9,30 @@ public interface IOrderService {
 
     /**
      *
-     * @param correlationId - UUID to trace the request
      * @return All the orders
      */
-    List<OrderResponseDTO> listOrders(String correlationId);
+    List<OrderResponseDTO> listOrders();
 
     /**
      *
      * @param id - Input ID
-     * @param correlationId - UUID to trace the request
      * @return An order based on a given ID
      */
-    OrderResponseDTO getOrder(Long id, String correlationId);
+    OrderResponseDTO getOrder(Long id);
 
     /**
      *
      * @param orderRequestDTO - OrderRequestDTO Object
-     * @param correlationId - UUID to trace the request
      */
-    void registerOrder(OrderRequestDTO orderRequestDTO, String correlationId);
+    void registerOrder(OrderRequestDTO orderRequestDTO);
 
     /**
      *
      * @param id - Input ID
      * @param orderRequestDTO - OrderRequestDTO Object
-     * @param correlationId - UUID to trace the request
      * @return boolean indicating whether the product update was successful or not
      */
-    boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO, String correlationId);
+    boolean updateOrder(Long id, OrderRequestDTO orderRequestDTO);
 
     /**
      *

@@ -16,7 +16,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 
-import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +52,7 @@ public class ProductController {
 	)
 	@GetMapping
 	public ResponseEntity<List<ProductResponseDTO>> listProducts() {
+		logger.debug("listProducts() method invoked.");
 		return ResponseEntity.status(HttpStatus.OK).body(iProductService.listProducts());
 	}
 
@@ -65,11 +65,11 @@ public class ProductController {
 			description = "HTTP Status OK."
 	)
 	@GetMapping("/{id}")
-	public ResponseEntity<ProductResponseDTO> getProduct(@RequestHeader("cameriere-correlation-id") String correlationId,
-														 @PathVariable
+	public ResponseEntity<ProductResponseDTO> getProduct(@PathVariable
 															 Long id) {
-		logger.debug("cameriere-correlation-id found: {}", correlationId);
+		logger.debug("getProduct() method start.");
 		ProductResponseDTO productResponseDTO = iProductService.getProduct(id);
+		logger.debug("getProduct() method end.");
 		return ResponseEntity.status(HttpStatus.OK).body(productResponseDTO);
 	}
 
@@ -84,7 +84,9 @@ public class ProductController {
 	@PostMapping
 	public ResponseEntity<ResponseDTO> registerProduct(@Valid ProductRequestDTO productRequestDTO,
 													   @RequestParam MultipartFile file) throws IOException {
+		logger.debug("registerProduct() method start.");
 		iProductService.registerProduct(productRequestDTO, file);
+		logger.debug("registerProduct() method end.");
 		return ResponseEntity
 				.status(HttpStatus.CREATED)
 				.body(new ResponseDTO(ProductConstants.STATUS_201, ProductConstants.MESSAGE_201));
@@ -116,7 +118,9 @@ public class ProductController {
 														 Long id,
 													 @Valid ProductRequestDTO productRequestDTO,
 													 @RequestParam(required = false) MultipartFile file) throws IOException {
+		logger.debug("updateProduct() method start.");
 		boolean isUpdated = iProductService.updateProduct(id, productRequestDTO, file);
+		logger.debug("updateProduct() method end.");
 		if (isUpdated) {
 			return ResponseEntity
 					.status(HttpStatus.OK)
@@ -152,7 +156,9 @@ public class ProductController {
 	@DeleteMapping("/{id}")
 	public ResponseEntity<ResponseDTO> deleteProduct(@PathVariable
 														 Long id) {
+		logger.debug("deleteProduct() method start.");
 		boolean isDeleted = iProductService.deleteProduct(id);
+		logger.debug("deleteProduct() method end.");
 		if (isDeleted) {
 			return ResponseEntity
 					.status(HttpStatus.OK)

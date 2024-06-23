@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 public class ProductFallback implements ProductFeignClient {
 
     @Override
-    public ResponseEntity<ProductDTO> getProduct(String correlationId, Long id) {
+    public ResponseEntity<ProductDTO> getProduct(Long id) {
         return null;
     }
 }
