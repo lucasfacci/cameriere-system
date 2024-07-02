@@ -317,10 +317,12 @@ services:
       service: microservice-config-server-configs
 
   menu:
-    image: "lucasfacci/menu:0.1.0"
+    image: "lucasfacci/menu:0.1.1"
     container_name: menu-ms
     depends_on:
       menudb:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -336,15 +338,18 @@ services:
       SPRING_APPLICATION_NAME: "menu"
       SPRING_DATASOURCE_URL: "jdbc:mysql://menudb:3306/menudb"
       OTEL_SERVICE_NAME: "menu"
+      SPRING_RABBITMQ_HOST: "rabbit"
     extends:
       file: common-configs.yml
       service: microservice-eureka-configs
 
   order:
-    image: "lucasfacci/order:0.1.0"
+    image: "lucasfacci/order:0.1.1"
     container_name: order-ms
     depends_on:
       ordersdb:
+        condition: service_healthy
+      rabbit:
         condition: service_healthy
       config-server:
         condition: service_healthy
@@ -360,6 +365,7 @@ services:
       SPRING_APPLICATION_NAME: "order"
       SPRING_DATASOURCE_URL: "jdbc:mysql://ordersdb:3306/ordersdb"
       OTEL_SERVICE_NAME: "order"
+      SPRING_RABBITMQ_HOST: "rabbit"
     extends:
       file: common-configs.yml
       service: microservice-eureka-configs
@@ -387,6 +393,18 @@ services:
     extends:
       file: common-configs.yml
       service: microservice-eureka-configs
+
+  message:
+    image: "lucasfacci/message:0.0.1"
+    container_name: message-ms
+    depends_on:
+      rabbit:
+        condition: service_healthy
+    environment:
+      SPRING_RABBITMQ_HOST: "rabbit"
+    extends:
+      file: common-configs.yml
+      service: network-deploy-service
 
 networks:
   cameriere-network:
