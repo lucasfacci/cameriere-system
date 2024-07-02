@@ -46,4 +46,11 @@ public interface IProductService {
      * @return boolean indicating whether the product deletion was successful or not
      */
     boolean deleteProduct(Long id);
+
+    /**
+     *
+     * @param productIds - IDs of the products
+     * @return boolean indicating if the product quantity was updated successfully or not
+     */
+    boolean decreaseProductsQuantity(List<Long> productIds);
 }

@@ -1,5 +1,6 @@
 package com.cameriere.order.services.impl;
 
+import com.cameriere.order.dtos.OrderMessageDTO;
 import com.cameriere.order.dtos.OrderRequestDTO;
 import com.cameriere.order.dtos.OrderResponseDTO;
 import com.cameriere.order.dtos.ProductDTO;
@@ -10,10 +11,14 @@ import com.cameriere.order.services.clients.ProductFeignClient;
 import com.cameriere.order.repositories.OrderRepository;
 import com.cameriere.order.services.IOrderService;
 import lombok.AllArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.cloud.stream.function.StreamBridge;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,8 +26,11 @@ import java.util.List;
 @AllArgsConstructor
 public class OrderServiceImpl implements IOrderService {
 
+    private static final Logger log = LoggerFactory.getLogger(OrderServiceImpl.class);
+
     private OrderRepository orderRepository;
     private ProductFeignClient productFeignClient;
+    private final StreamBridge streamBridge;
 
     /**
      *
@@ -87,11 +95,29 @@ public class OrderServiceImpl implements IOrderService {
             ProductDTO productDTO = productFeignClient.getProduct(productId).getBody();
             if (productDTO.getActive()) {
                 totalPrice = totalPrice.add(productDTO.getPrice());
+
             } else {
                 throw new ResourceNotFoundException("Product", "id", productId.toString());
             }
         }
+
         order.setTotalPrice(totalPrice);
+        String status = orderRequestDTO.getStatus();
+        if (status != null) {
+            order.setStatus(status);
+            switch (status) {
+                case "PENDING" -> order.setPendingTimestamp(LocalDateTime.now());
+                case "CONFIRMED" -> order.setConfirmedTimestamp(LocalDateTime.now());
+                case "PREPARING" -> order.setPreparingTimestamp(LocalDateTime.now());
+                case "READY" -> order.setReadyTimestamp(LocalDateTime.now());
+                case "COMPLETED" -> order.setCompletedTimestamp(LocalDateTime.now());
+                case "CANCELLED" -> order.setCancelledTimestamp(LocalDateTime.now());
+            }
+        } else {
+            order.setStatus("PENDING");
+            order.setPendingTimestamp(LocalDateTime.now());
+        }
+
         orderRepository.save(order);
     }
 
@@ -119,8 +145,24 @@ public class OrderServiceImpl implements IOrderService {
 
         OrderMapper.mapToOrderFromOrderRequestDTO(orderRequestDTO, order);
         order.setTotalPrice(totalPrice);
+        String status = orderRequestDTO.getStatus();
+        if (status != null) {
+            order.setStatus(status);
+            switch (status) {
+                case "PENDING" -> order.setPendingTimestamp(LocalDateTime.now());
+                case "CONFIRMED" -> order.setConfirmedTimestamp(LocalDateTime.now());
+                case "PREPARING" -> order.setPreparingTimestamp(LocalDateTime.now());
+                case "READY" -> order.setReadyTimestamp(LocalDateTime.now());
+                case "COMPLETED" -> order.setCompletedTimestamp(LocalDateTime.now());
+                case "CANCELLED" -> order.setCancelledTimestamp(LocalDateTime.now());
+            }
+        }
 
-        orderRepository.save(order);
+        Order savedOrder = orderRepository.save(order);
+        if (savedOrder.getStatus().equals("READY")) {
+            sendCommunication(savedOrder);
+        }
+
         return true;
     }
 
@@ -136,5 +178,13 @@ public class OrderServiceImpl implements IOrderService {
 
         orderRepository.deleteById(order.getId());
         return true;
+    }
+
+    private void sendCommunication(Order order) {
+        var orderMessageDTO = new OrderMessageDTO(order.getTableNumber(), order.getTotalPrice(), order.getProducts(), order.getStatus(), order.getNote());
+
+        log.info("Sending communication request for the details: {}", orderMessageDTO);
+        var result = streamBridge.send("sendCommunication-out-0", orderMessageDTO);
+        log.info("Is the communication request successfully triggered? : {}", result);
     }
 }

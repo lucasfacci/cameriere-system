@@ -128,6 +128,9 @@ public class ProductServiceImpl implements IProductService {
 
 			ProductMapper.mapToProductFromProductRequestDTO(productRequestDTO, product);
 			product.setImagePath(fileNameAndPath.toString());
+			if (product.getQuantity() > 0) {
+				product.setSoldOut(false);
+			}
 		}
 
 		if (productRequestDTO.getActive() == null) {
@@ -156,5 +159,32 @@ public class ProductServiceImpl implements IProductService {
 
 		productRepository.deleteById(product.getId());
 		return true;
+	}
+
+	/**
+	 * @param productIds - IDs of the products
+	 * @return boolean indicating if the product quantity was updated successfully or not
+	 */
+	@Override
+	public boolean decreaseProductsQuantity(List<Long> productIds) {
+		boolean isUpdated = false;
+
+		for (Long productId : productIds) {
+			if (productId != null) {
+				Product	product = productRepository.findById(productId).orElseThrow(
+						() -> new ResourceNotFoundException("Product", "id", productId.toString())
+				);
+
+				product.setQuantity(product.getQuantity() - 1);
+				if (product.getQuantity() <= 0) {
+					product.setSoldOut(true);
+				}
+
+				productRepository.save(product);
+				isUpdated = true;
+			}
+		}
+
+		return isUpdated;
 	}
 }
